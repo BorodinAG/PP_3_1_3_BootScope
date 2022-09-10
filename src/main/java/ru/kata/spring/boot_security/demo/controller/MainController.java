@@ -32,21 +32,21 @@ public class MainController {
             roleService.addRole(new Role("ROLE_USER"));
         }
         if (userService.listUsers().isEmpty()) {
-            userService.addUser(new User("admin@admin.com", userService.userPassword("admin"),
+            userService.addUser(new User("admin@admin.com", userService.userPassword("1"),
                     "bob", "bobin", "admin@admin.com", roleService.findRolesByName("ROLE_ADMIN")));
-            userService.addUser(new User("user@user.com", userService.userPassword("user"),
+            userService.addUser(new User("user@user.com", userService.userPassword("1"),
                     "Ivan", "Ivanov", "user@user.com", roleService.findRolesByName("ROLE_USER")));
 
         }
         return "index";
     }
 
-    // загрузка страницы пользователей
-    @GetMapping("/users")
-    public String getUsers(Model model) {
-        model.addAttribute("list", userService.listUsers());
-        return "users";
-    }
+    @GetMapping("/login")
+    public String login() { return "login"; }
+
+    @PostMapping("/logout")
+    public String logout() { return "redirect:/index"; }
+
 
     // загрузка личной страницы пользователя
     @GetMapping("/user/{username}")
@@ -72,6 +72,13 @@ public class MainController {
         return "admin";
     }
 
+    @GetMapping("/new")
+    public String newUser(Model model) {
+        model.addAttribute("newUser", new User());
+        model.addAttribute("roles", roleService.listRoles());
+        return "newUser";
+    }
+
     @PostMapping()
     public String userCreate(@ModelAttribute("newUser") User user, @RequestParam(value = "role") String role) {
         user.setRoles(roleService.findRolesByName(role));
@@ -79,15 +86,8 @@ public class MainController {
         return "redirect:/admin";
     }
 
-//    //редактирование пользователя
-//    @GetMapping("/edit/{id}")
-//    public String editUser(Model model, @PathVariable("id") Long id) {
-//        model.addAttribute("roles", roleService.listRoles());
-//        model.addAttribute("user", userService.getUser(id));
-//        return "edit";
-//    }
 
-    @PatchMapping("/edit/{id}")
+    @PostMapping("/update/{id}")
     public String edit(@ModelAttribute("user") User user) {
         userService.updateUser(user);
         return "redirect:/admin";
@@ -96,7 +96,6 @@ public class MainController {
     //удаление пользователя
     @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable("id") long id) {
-        User user = userService.getUser(id);
         userService.deleteUser(id);
         return "redirect:/admin";
     }

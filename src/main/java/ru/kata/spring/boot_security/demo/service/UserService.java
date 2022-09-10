@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository,@Lazy PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -33,13 +34,19 @@ public class UserService implements UserDetailsService {
     public User getUser(long id) {
         return userRepository.getById(id);
     }
-    public String userPassword(String password){passwordEncoder.encode(password);
-        return password;
+
+    public String userPassword(String password) {
+        return passwordEncoder.encode(password);
     }
 
     public void addUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        User userFromDB = userRepository.findByUsername(user.getUsername());
+        if (userFromDB != null) {
+            System.out.println("A user with this login already exists. Choose another login.");
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(user);
+        }
     }
 
     public List<User> listUsers() {
@@ -50,35 +57,19 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
-    @Transactional
     public void updateUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User userFromDb = userRepository.getById(user.getId());
+        if (!userFromDb.getPassword().equals(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         userRepository.save(user);
     }
 
-//    public void updateUser(User user) {
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        userRepository.save(user);
-//    }
-//    public void saveUser(User user) {
-//        User updatedUser = findByUsername(user.getUsername());
-//        if (updatedUser == null) {
-//            userRepository.save(user);
-//            return;
-//        }
-//        updatedUser.setName(user.getName());
-//        updatedUser.setSurname(user.getSurname());
-//        updatedUser.setEmail(user.getEmail());
-//        updatedUser.setUsername(user.getUsername());
-//        updatedUser.setPassword(passwordEncoder.encode(user.getPassword()));
-//        userRepository.save(updatedUser);
-//    }
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     @Override
-    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
         if (user == null) {
@@ -89,8 +80,6 @@ public class UserService implements UserDetailsService {
     }
 
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
-        return roles.stream().map(r -> new SimpleGrantedAuthority(r.getRole())).collect(Collectors.toList());
+        return roles.stream().map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList());
     }
-
-
 }

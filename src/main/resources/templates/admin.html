@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+     <!-- xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3"-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -88,60 +88,61 @@
                                                 
                                                 <td>
                                                     <!-- Кнопка-триггер модального окна Edit-->
-                                                    <button type="button" class="btn btn-info" data-bs-toggle="modal" th:data-bs-target="${'#edit'+user.id}">
+                                                    <button type="button" class="btn btn-info" data-bs-toggle="modal" th:data-bs-target="${'#update'+user.id}">
                                                         Edit
                                                     </button>
                                                     
                                                     <!-- Модальное окно Edit-->
-                                                    <div class="modal fade" th:id="${'edit'+user.id}" tabindex="-1" aria-labelledby="editLabel" aria-hidden="true">
-                                                        <form  th:action="@{/users/{id} (id=${user.getId()})}" th:object="${user}" method="patch">
+                                                    <div class="modal fade" th:id="${'update'+user.id}" tabindex="-1" aria-labelledby="updateLabel" aria-hidden="true">
+                                                        <form th:method="POST" th:action="@{/update/{id}(id=${user.getId()})}" th:object="${user}">
+                                                       <!-- <form  th:action="@{/update/{id} (id=${user.getId()})}" th:object="${user}" method="patch">-->
                                                         <div class="modal-dialog">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                            <h5 class="modal-title" id="editLabel">Edit user</h5>
+                                                            <h5 class="modal-title" id="updateLabel">Edit user</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                     <div class="row mb-3">
                     
-                                                                        <label for="eId" class="col-form-label text-center fw-bold">ID</label>
+                                                                        <strong><label for="eId" class="col-form-label text-center fw-bold">ID</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
-                                                                            <input type="ID" class="form-control" th:value="${user.id}" id="eId" name="id"  readonly>
+                                                                            <input readonly type="number" class="form-control" th:value="${user.id}" id="eId" name="id">
                                                                         </div>
                     
-                                                                        <label for="editName" class="col-form-label text-center fw-bold">Name</label>
+                                                                        <strong><label for="editName" class="col-form-label text-center fw-bold">Name</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
                                                                             <input type="text" class="form-control" th:value="${user.name}" id="editName" name="name">
                                                                         </div>
                     
-                                                                        <label for="editSurname" class="col-form-label text-center fw-bold">Surname</label>
+                                                                        <strong></strong><label for="editSurname" class="col-form-label text-center fw-bold">Surname</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
                                                                             <input type="text" class="form-control" th:value="${user.surname}" id="editSurname" name="surname">
                                                                         </div>
                     
-                                                                        <label for="editEmail" class="col-form-label text-center fw-bold">Email</label>
+                                                                        <strong><label for="editEmail" class="col-form-label text-center fw-bold">Email</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
                                                                             <input type="email" class="form-control" th:value="${user.username}" id="editEmail" name="username">
                                                                         </div>
                     
-                                                                        <label for="editPassword" class="col-form-label text-center fw-bold">Password</label>
+                                                                        <strong><label for="editPassword" class="col-form-label text-center fw-bold">Password</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
                                                                             <input type="text" class="form-control" th:value="${user.password}" id="editPassword" name="password">
                                                                         </div>
                                                                         
-                                                                        <label for="editRoleID" class="col-form-label text-center fw-bold">Role</label>
+                                                                        <strong><label for="editRoleID" class="col-form-label text-center fw-bold">Role</label></strong>
                                                                         <div class="col-sm-3"></div>
                                                                         <div class="col-sm-6">
-                                                                            <select multiple class="custom-select w-100" size="2" id="editRoleID" name="role">
+                                                                            <select multiple class="custom-select w-100" size="2" th:field="${user.roles}" id="editRoleID" name="role">
                                                                                 <option
                                                                                 th:each="role : ${roles}"
-                                                                                th:text="${role.getRole()}"
-                                                                                th:value="${role.role}">
+                                                                                th:text="${role.getName()}"
+                                                                                th:value="${role.getId()}">
                                                                                     </option>
                                                                                 </select>
                                                                         </div>
@@ -213,8 +214,8 @@
                                                                             <select multiple class="custom-select w-100" size="2" id="roleID" name="role" disabled readonly>
                                                                                 <option
                                                                                 th:each="role : ${roles}"
-                                                                                th:text="${role.getRole()}"
-                                                                                th:value="${role.role}">
+                                                                                th:text="${role.getName()}"
+                                                                                th:value="${role.name}">
                                                                                     </option>
                                                                                 </select>
                                                                             </div>
@@ -279,8 +280,8 @@
                                                                 size="2" id="inputRole" name="role">
                                                             <option
                                                                     th:each="role : ${roles}"
-                                                                    th:text="${role.getRole()}"
-                                                                    th:value="${role.role}">
+                                                                    th:text="${role.getName()}"
+                                                                    th:value="${role.name}">
                                                             </option>
                                                         </select>
                                                     </div>
